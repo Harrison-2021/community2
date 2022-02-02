@@ -1,0 +1,45 @@
+第一课时：
+    1. maven 配置与操作，官网->user Centre->Maven in 5 Minutes:
+        1. mvn -version，查看版本
+        2. 创建项目，找到要创建对象保存的地址，
+            mvn archetype:generate -DgroupId=com.nowcoder.mavendemo1 -DartifactId=mavendemo1 -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false
+        3. 项目编译，找到目标文件下，mvn compile
+        4. 重新编译，mvn clean compile
+        5. 测试，mvn clean test
+   2. Spring Boot 核心作用
+        1. 起步依赖、自动配置、端点监控
+
+   3. tomcat服务器，可以更改端口，在application.properties配置文件中修改
+        server.port=8080
+        server.servlet.context-path=/community
+
+   4. IOC容器设计：用容器管理bean，bean相当于类的代理，减少对象之间的耦合度
+        1. 前提：管理哪些bean，以及benn的类型，
+            配置文件进行配置，通过配置描述进行关联，不是对象之间直接关联
+        2. 运行原理： SpringApplication，运行时，不仅自动启动tomcate，还自动创建了Spring容器，容器会自动扫描包，配置信息，
+        3. 注解的种类:
+            1是使用bean，@Autowired,@Resource
+            2是注册bean,@Component,@Repository,@Controller,@Service, @Configuration
+            这些注解都是把你要实例化的对象转化成一个Bean，放在IoC容器中，
+            等你要用的时候，它会和上面的@Autowired , @Resource配合到一起，把对象、属性、方法完美组装。
+        4. 在测试类中演示IOC运行机制
+            首先，在测试类中添加注解配置，@ContextConfiguration(classes = CommunityApplication.class)
+            类要实现ApplicationContextAware接口，并重写setApplicationContext(ApplicationContext applicationContext)
+            ApplicationContext继承HierarchicalBeanFactory继承BeanFactory，实质上是一个是spring容器
+
+	        书写操作数据库的文件AlphaDaoHibernateImpl，从AlphaDAO继承，加上注解@Repository，会将类加到容器里
+	        在测试类中，用容器拿到bean，再将拿到的bean打印出来进行测试
+	    5. 为了体现IOC运行的优势，再创建一个操作数据库文件AlphaDaoMybatisImpl，同样继承
+	        为了作出区分，多加一个注解@Primary,就会优先调用，因此，定义好接口，只需修改配置注解，就可以降低对象之间的耦合度
+	    6. 可以在注解中，加上bean的名字，这样，可以直接通过名字获取bean
+	    7. IOC容器还可以管理bean的初始化和销毁
+	        增加一个Service对象，在初始化方法上注解@PostConstruct，
+	        在销毁方法前加注解@PreDestroy
+	    8. 用IOC管理其他包的类，
+	        建立一个配置类，在配置类中进行依赖管理，config->AlphaConfig->@Configuration
+            在目标方法前，加入注解@Bean，将方法返回的对象装到容器里，SimpleDateFormat
+        9. Spring Boot框架中自动获取Bean方法，
+            @Autowired，在类属性前注入，获取目标Bean，默认是@Primary注解的Bean
+            @Qualifier,写上Bean的名字，可以自动装配改名字的Bean
+        10. 项目中调用流程：Controller调用Service，Service调用DAO，都是用依赖注入的方式调用
+	
