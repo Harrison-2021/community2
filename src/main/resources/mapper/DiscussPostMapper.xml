@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nowcoder.community.dao.DiscussPostMapper">
+    <!--    定义复用代码块-->
+    <sql id="selectFields">
+        select id, user_id, title, content, type, status, create_time, comment_count, score from discuss_post
+    </sql>
+
+<!--    查询指定页面信息的帖子列表-->
+    <select id="getPosts" resultType="discussPost">
+        <include refid="selectFields"></include>
+        where status != 2
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+        order by type desc, create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+<!--    查询一共有多少条帖子-->
+<!--    返回类型必须要写-->
+    <select id="getPostRows" resultType="int">
+        select count(id)
+        from discuss_post
+        where status != 2
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+    </select>
+
+</mapper>
