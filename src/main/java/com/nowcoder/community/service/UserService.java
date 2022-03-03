@@ -1,6 +1,7 @@
 package com.nowcoder.community.service;
 
 import com.nowcoder.community.dao.UserMapper;
+import com.nowcoder.community.entity.CommunityConstant;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.MailClient;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class UserService {
+public class UserService implements CommunityConstant {
     @Autowired
     private UserMapper userMapper;
 
@@ -115,5 +116,23 @@ public class UserService {
         String content = templateEngine.process("/mail/activation", context);
         mailClient.sendMail(user.getEmail(), "交流网用户注册激活链接", content);
         return falseMap;
+    }
+
+    /**
+     * 处理用户激活业务
+     * @param userId 解析url中的userID,定位指定用户
+     * @param code  解析url中的激活码
+     * @return      返回激活状态，用静态变量展示
+     */
+    public int activation(int userId, String code) {
+        User user = userMapper.selectById(userId);
+        if (user.getStatus() == 1) {   // 重复激活
+            return ACTIVATION_REPEAT;
+        } else if (user.getActivationCode().equals(code)) { // 激活码匹配成功
+            userMapper.updateStatus(userId, 1); // 更新用户状态，激活成功
+            return ACTIVATION_SUCCESS;
+        } else {    // 激活码不匹配，不能激活
+            return ACTIVATION_FAILURE;
+        }
     }
 }
