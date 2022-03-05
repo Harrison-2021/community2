@@ -1,8 +1,10 @@
 package com.nowcoder.community;
 
 import com.nowcoder.community.dao.DiscussPostMapper;
+import com.nowcoder.community.dao.LoginTicketMapper;
 import com.nowcoder.community.dao.UserMapper;
 import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +24,8 @@ public class MapperTest {
     UserMapper userMapper;
     @Autowired
     DiscussPostMapper discussPostMapper;
+    @Autowired
+    LoginTicketMapper loginTicketMapper;
 
 //    用户表相关sql语句操作的测试
     @Test
@@ -71,6 +75,29 @@ public class MapperTest {
 
         int rows = discussPostMapper.getPostRows(149);
         System.out.println(rows);
+    }
+
+// 登录凭证数据的测试
+    // 添加数据
+    @Test
+    public void testInsertLoginTicket() {
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(199);
+        loginTicket.setTicket("test");
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + 1000 * 60 * 10)); // 10分钟后过期
+        loginTicketMapper.insertLoginTicket(loginTicket);
+    }
+
+    // 查询和修改数据
+    @Test
+    public void testSelectLoginTicket() {
+        LoginTicket ticket = loginTicketMapper.selectByTicket("test");
+        System.out.println(ticket);
+
+        loginTicketMapper.updateLoginTicket("test", 1);
+        ticket = loginTicketMapper.selectByTicket("test");
+        System.out.println(ticket.getStatus());
     }
 }
 
