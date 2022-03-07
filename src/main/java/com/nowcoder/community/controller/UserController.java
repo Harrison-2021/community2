@@ -1,5 +1,6 @@
 package com.nowcoder.community.controller;
 
+import com.nowcoder.community.controller.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityUtil;
@@ -41,12 +42,14 @@ public class UserController {
     String uploadPath;
 
     /** 显示账号设置页面 */
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage(){
         return "/site/setting";
     }
 
     /** 处理用户头像文件上传请求 */
+    @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     // Spring MVC 中的MultipartFile接口会自动获取上传的文件图片
     public String uploadHeader(MultipartFile headerImage, Model model) {
