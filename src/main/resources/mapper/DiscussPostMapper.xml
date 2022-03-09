@@ -3,9 +3,13 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nowcoder.community.dao.DiscussPostMapper">
-    <!--    定义复用代码块-->
+<!--    定义复用代码块-->
     <sql id="selectFields">
         select id, user_id, title, content, type, status, create_time, comment_count, score from discuss_post
+    </sql>
+    <sql id="insertFields">
+        insert into discuss_post(user_id, title, content, type, status, create_time, comment_count, score)
+          values (#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
     </sql>
 
 <!--    查询指定页面信息的帖子列表-->
@@ -30,4 +34,8 @@
         </if>
     </select>
 
+<!--    添加帖子-->
+    <insert id="insertPosts" parameterType="discussPost" keyProperty="id">
+        <include refid="insertFields"></include>
+    </insert>
 </mapper>

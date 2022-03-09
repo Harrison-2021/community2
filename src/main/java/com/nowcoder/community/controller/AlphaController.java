@@ -65,7 +65,6 @@ public class AlphaController {
 
     // 框架中简单的操作，框架已经将底层操作包装好了
     // 测试get请求
-
     // /students?current=1&limit=20
     @RequestMapping(path = "/students", method = {RequestMethod.GET})
     @ResponseBody
@@ -193,5 +192,14 @@ public class AlphaController {
         System.out.println(session.getAttribute("id"));
         System.out.println(session.getAttribute("name"));
         return "get session";
+    }
+
+    // ajax示例
+    @RequestMapping(path = "/ajax", method = RequestMethod.POST)
+    @ResponseBody
+    public String testAjax(String name, int age) {
+        System.out.println(name); // 可以获取异步请求中的js对象参数值
+        System.out.println(age);
+        return CommunityUtil.getJSONString(0, "操作成功!");
     }
 }

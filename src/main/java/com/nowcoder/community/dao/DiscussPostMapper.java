@@ -14,4 +14,9 @@ public interface DiscussPostMapper {
     // 查询一共有多少条帖子
     // 如果只有一个参数,并且在<if>里使用,则必须加@Param注解
     int getPostRows(@Param("userId") int userId);
+
+    /**
+     * 增加帖子
+     */
+    int insertPosts(DiscussPost discussPost);
 }

@@ -99,5 +99,15 @@ public class MapperTest {
         ticket = loginTicketMapper.selectByTicket("test");
         System.out.println(ticket.getStatus());
     }
+
+    // 添加帖子
+    @Test
+    public void testInsertPosts() {
+        DiscussPost discussPost = new DiscussPost();
+        discussPost.setContent("你好");
+        discussPost.setTitle("测试");
+        discussPost.setCreateTime(new Date());
+        discussPostMapper.insertPosts(discussPost);
+    }
 }
 
