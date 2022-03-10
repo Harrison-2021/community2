@@ -19,4 +19,8 @@ public interface DiscussPostMapper {
      * 增加帖子
      */
     int insertPosts(DiscussPost discussPost);
+
+    /** 查询一条帖子 */
+    DiscussPost selectPost(int id);
+
 }

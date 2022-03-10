@@ -38,4 +38,10 @@
     <insert id="insertPosts" parameterType="discussPost" keyProperty="id">
         <include refid="insertFields"></include>
     </insert>
+
+<!--    查询一条帖子-->
+    <select id="selectPost" resultType="discussPost">
+        <include refid="selectFields"></include>
+        where id = #{id}
+    </select>
 </mapper>

@@ -109,5 +109,11 @@ public class MapperTest {
         discussPost.setCreateTime(new Date());
         discussPostMapper.insertPosts(discussPost);
     }
+
+    // 查询帖子
+    @Test
+    public void testSelectPosts() {
+        System.out.println(discussPostMapper.selectPost(283));
+    }
 }
 

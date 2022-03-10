@@ -48,4 +48,9 @@ public class DiscussPostService {
         // 3.入库
         return discussPostMapper.insertPosts(discussPost);
     }
+
+    /** 查询一条帖子信息 */
+    public DiscussPost selectPost(int id) {
+        return discussPostMapper.selectPost(id);
+    }
 }
