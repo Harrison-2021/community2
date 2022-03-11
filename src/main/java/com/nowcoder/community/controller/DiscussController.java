@@ -1,11 +1,13 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.controller.annotation.LoginRequired;
-import com.nowcoder.community.dao.DiscussPostMapper;
+import com.nowcoder.community.entity.Comment;
 import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.service.CommentService;
 import com.nowcoder.community.service.DiscussPostService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Date;
+import java.util.*;
 
 @Controller
 @RequestMapping("/discuss")
-public class DiscussController {
+public class DiscussController implements CommunityConstant {
     @Autowired
     DiscussPostService discussPostService;
 
@@ -29,6 +31,9 @@ public class DiscussController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    CommentService commentService;
 
     /**
      * 处理ajax异步发布帖子请求
@@ -59,17 +64,62 @@ public class DiscussController {
     /**
      * 处理访问一条帖子的详情页面的请求
      * @param model
-     * @param id 帖子id
+     * @param postId 帖子id
      * @return
      */
     @RequestMapping(value = "/detail/{postId}", method = RequestMethod.GET)
-    public String getPostPage(Model model, @PathVariable("postId") int id) {
+    public String getPostPage(Model model, @PathVariable("postId") int postId, Page page ) {
         // 查询到指定帖子-由于点击的是帖子主题，一定存在帖子
-        DiscussPost discussPost = discussPostService.selectPost(id);
-        model.addAttribute("postMsg", discussPost);
+        DiscussPost discussPost = discussPostService.selectPost(postId);
+        model.addAttribute("post", discussPost);
         // 查询到帖子作者信息-帖子必须由指定用户发布，故，一定能查询到用户
         User user = userService.findUserById(discussPost.getUserId());
-        model.addAttribute("userMsg", user);
+        model.addAttribute("user", user);
+
+        // 处理分页信息-设置页面
+        page.setLimit(5);
+        page.setPath("/discuss/detail/" + postId);
+        page.setRows(discussPost.getCommentCount());    // 直接从帖子表中拿，减少查询次数
+
+        // 查询帖子的评论分页信息-将关联用户信息一并封装
+        List<Comment> commentList = commentService.selectCommentList(
+                ENTITY_TYPE_POST, discussPost.getId(), page.getOffset(), page.getLimit());
+        List<Map<String, Object>> commentVoList = new ArrayList<>();
+        if(commentList != null) {   // 有可能没有评论，注意边界条件
+            for(Comment comment : commentList) {
+                Map<String, Object> commentVoMap = new HashMap<>();
+                commentVoMap.put("comment", comment);
+                commentVoMap.put("user", userService.findUserById(comment.getUserId()));
+
+                // 每条评论的回复数量统计
+                int replyCount = commentService.selectComments(ENTITY_TYPE_COMMENT, comment.getId());
+                commentVoMap.put("replyCount", replyCount);
+                // 根据每条评论的id，循环查询每条评论下的所有回复信息
+                List<Comment> replyList = commentService.selectCommentList(
+                        ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE); // 回复显示无需分页
+                List<Map<String, Object>> replyVoList = new ArrayList<>(); // 封装list
+                if(replyList != null) {
+                    for(Comment reply : replyList) {
+                        Map<String, Object> replyVoMap = new HashMap<>();
+                        replyVoMap.put("reply", reply);
+                        replyVoMap.put("user", userService.findUserById(reply.getUserId()));
+                        // 回复中需要用到targetId
+                        // 找到回复目标用户作者-注意，如果targetId=0,表示无效，无需查询
+                        User targetUser = reply.getTargetId() == 0 ? null :
+                                userService.findUserById(reply.getTargetId());
+                        replyVoMap.put("targetUser", targetUser);
+
+                        replyVoList.add(replyVoMap);
+                    }
+                }
+
+                commentVoMap.put("replys",replyVoList); // 将当前评论的所有回复封装数据放进评论map中
+
+                commentVoList.add(commentVoMap);
+            }
+        }
+        model.addAttribute("comments", commentVoList);
+
         return "/site/discuss-detail";
     }
 }

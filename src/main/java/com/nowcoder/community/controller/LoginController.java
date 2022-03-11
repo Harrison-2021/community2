@@ -119,7 +119,7 @@ public class LoginController implements CommunityConstant {
         String kaptcha = (String)session.getAttribute("kaptcha");
         // 与用户输入验证码比对，注意要判空
         if(StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code)
-            || !kaptcha.equals(code)) {
+            || !kaptcha.equalsIgnoreCase(code)) {
             model.addAttribute("codeMsg", "验证码不正确!");
             return "/site/login";
         }
