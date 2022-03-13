@@ -23,4 +23,7 @@ public interface DiscussPostMapper {
     /** 查询一条帖子 */
     DiscussPost selectPost(int id);
 
+    /** 更新指定id的帖子的评论数量 */
+    int updateCommentCount(int id, int commentCount);
+
 }

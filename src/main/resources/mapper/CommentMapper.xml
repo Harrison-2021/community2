@@ -30,5 +30,9 @@
         and entity_type = #{entityType}
         and entity_id = #{entityId}
     </select>
-
+    
+<!--    增加评论-->
+    <insert id="insertComment" parameterType="comment" keyProperty="id">
+        <include refid="insertFields"></include>
+    </insert>
 </mapper>
