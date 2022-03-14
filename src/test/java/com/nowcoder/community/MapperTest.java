@@ -2,9 +2,11 @@ package com.nowcoder.community;
 
 import com.nowcoder.community.dao.DiscussPostMapper;
 import com.nowcoder.community.dao.LoginTicketMapper;
+import com.nowcoder.community.dao.MessageMapper;
 import com.nowcoder.community.dao.UserMapper;
 import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.LoginTicket;
+import com.nowcoder.community.entity.Message;
 import com.nowcoder.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +28,9 @@ public class MapperTest {
     DiscussPostMapper discussPostMapper;
     @Autowired
     LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    MessageMapper messageMapper;
 
 //    用户表相关sql语句操作的测试
     @Test
@@ -114,6 +119,29 @@ public class MapperTest {
     @Test
     public void testSelectPosts() {
         System.out.println(discussPostMapper.selectPost(283));
+    }
+
+    @Test
+    public void testSelectLetters() {
+        int i = 0;
+        List<Message> list = messageMapper.selectConversationList(111, 0, 20);
+        for(Message message : list) {
+            System.out.println((++i) + " : " + message);
+        }
+
+        System.out.println("111会话列表总数 " + messageMapper.selectConversationCount(111));
+
+        list = messageMapper.selectLetterList("111_112", 0, 10);
+        i = 0;
+        for(Message message : list) {
+            System.out.println((++i) + " : " + message);
+        }
+
+        System.out.println("111与112会话列表总数 " + messageMapper.selectLetterCount("111_112"));
+
+        System.out.println("111未读私信总数 " + messageMapper.selectUnreadCount(131, null));
+        System.out.println("111_131未读私信总数 " + messageMapper.selectUnreadCount(131, "111_131"));
+
     }
 }
 

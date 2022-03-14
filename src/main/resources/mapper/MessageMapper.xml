@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nowcoder.community.dao.MessageMapper">
+<!--    定义复用代码块-->
+    <sql id="selectFields">
+        select id, from_id, to_id, conversation_id, content, status, create_time from message
+    </sql>
+    <sql id="insertFields">
+        insert into message(from_id, to_id, conversation_id, content, status, create_time)
+          values (#{fromId}, #{toId}, #{conversationId}, #{content}, #{status}, #{createTime})
+    </sql>
+
+<!--    查询指定用户的会话列表 -内容只显示最新一条私信-->
+    <select id="selectConversationList" resultType="message">
+        <include refid="selectFields"></include>
+        where id in(
+            select max(id) from message
+            where status != 2
+            and from_id != 1
+            and (from_id = #{userId} or to_id = #{userId})
+            group by conversation_id
+        )
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+<!--    查询指定用户会话总数-->
+    <select id="selectConversationCount" resultType="int">
+        select count(id) from message
+        where id in (
+            select max(id) from message
+            where status != 2
+            and from_id != 1
+            and (from_id = #{userId} or to_id = #{userId})
+            group by conversation_id
+        )
+    </select>
+
+<!--    查询指定会话的两个用户之间的私信列表-->
+    <select id="selectLetterList" resultType="message">
+        <include refid="selectFields"></include>
+        where status != 2
+        and from_id != 1
+        and conversation_id = #{conversationId}
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+<!--    查询指定会话的两个用户之间的私信总数-->
+    <select id="selectLetterCount" resultType="int">
+        select count(id) from message
+        where status != 2
+        and from_id != 1
+        and conversation_id = #{conversationId}
+    </select>
+
+<!--    询未读私信数量-动态条件查询-当前用户总的未读私信数量-当前会话的未读私信数量-->
+    <select id="selectUnreadCount" resultType="int">
+        select count(id)
+        from message
+        where status = 0
+        and from_id != 1
+        and to_id = #{userId}
+        <if test="conversationId != null">
+            and conversation_id = #{conversationId}
+        </if>
+    </select>
+</mapper>
