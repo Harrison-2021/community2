@@ -13,9 +13,9 @@ function publish() {
 	$.post(
 		CONTEXT_PATH + "/discuss/add",
 		{"title":title, "content":content},
-		function (data) {	// 回调函数，目的是将提示信息msg在提示框展现出来
+		function (data)  {	// 回调函数，目的是将提示信息msg在提示框展现出来
 			data = $.parseJSON(data);		// 转为js对象，方便取值
-			$("hintBody").text(data.msg);	// 将msg值放入提示框中的显示框中
+			$("#hintBody").text(data.msg);	// 将msg值放入提示框中的显示框中
 			$("#hintModal").modal("show");		// 提示框展现提示信息
 			setTimeout(function(){		// 提示框展现时间设定，2秒后自动隐藏
 				$("#hintModal").modal("hide");
