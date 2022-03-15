@@ -2,8 +2,10 @@ package com.nowcoder.community.service;
 
 import com.nowcoder.community.dao.MessageMapper;
 import com.nowcoder.community.entity.Message;
+import com.nowcoder.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -11,6 +13,9 @@ import java.util.List;
 public class MessageService {
     @Autowired
     MessageMapper messageMapper;
+
+    @Autowired
+    SensitiveFilter sensitiveFilter;
 
     // 查询会话列表
     public List<Message> findConversations(int userId, int offset, int limit) {
@@ -35,5 +40,17 @@ public class MessageService {
     // 查询未读私信总数
     public int findLetterUnreadCount(int userId, String conversationId) {
         return messageMapper.selectUnreadCount(userId, conversationId);
+    }
+
+    // 添加信息-要对传过来的信息进行过滤
+    public int addMessage(Message message) {
+        message.setContent(HtmlUtils.htmlEscape(message.getContent()));
+        message.setContent(sensitiveFilter.filter(message.getContent()));
+        return messageMapper.insertMessage(message);
+    }
+
+    // 更新状态-更新为已读状态
+    public int updateStatus(List<Integer> ids) {
+        return messageMapper.updateStatus(ids, 1);
     }
 }

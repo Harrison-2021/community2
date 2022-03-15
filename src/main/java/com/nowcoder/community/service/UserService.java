@@ -44,6 +44,11 @@ public class UserService implements CommunityConstant {
         return userMapper.selectById(id);
     }
 
+    // 根据用户名查询用户
+    public User findUserByName(String name) {
+        return userMapper.selectByName(name);
+    }
+
     /**
      * 注册业务
      * @param user，用户信息
@@ -205,4 +210,6 @@ public class UserService implements CommunityConstant {
     public int updateHeader(int userId, String headerUrl) {
         return userMapper.updateHeader(userId, headerUrl);
     }
+
+
 }

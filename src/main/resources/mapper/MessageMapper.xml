@@ -56,7 +56,7 @@
         and conversation_id = #{conversationId}
     </select>
 
-<!--    询未读私信数量-动态条件查询-当前用户总的未读私信数量-当前会话的未读私信数量-->
+<!--    查询未读私信数量-动态条件查询-当前用户总的未读私信数量-当前会话的未读私信数量-->
     <select id="selectUnreadCount" resultType="int">
         select count(id)
         from message
@@ -67,4 +67,18 @@
             and conversation_id = #{conversationId}
         </if>
     </select>
+
+<!--    添加消息-->
+    <insert id="insertMessage" parameterType="message">
+        <include refid="insertFields"></include>
+    </insert>
+
+<!--    更新状态-->
+    <update id="updateStatus">
+        update message set status = #{status}
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
 </mapper>
