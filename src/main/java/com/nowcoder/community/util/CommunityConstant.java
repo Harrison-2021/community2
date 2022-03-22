@@ -31,4 +31,14 @@ public interface CommunityConstant {
      * entityType类型：评论
      */
     int ENTITY_TYPE_COMMENT = 2;
+
+    /**
+     * 点赞状态：位赞
+     */
+    int LIKE_STATUS_NO = 0;
+
+    /**
+     * 点赞状态：已赞
+     */
+    int LIKE_STATUS_YES = 1;
 }
