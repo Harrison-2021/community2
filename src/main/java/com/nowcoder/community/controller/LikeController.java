@@ -29,13 +29,13 @@ public class LikeController {
      */
     @RequestMapping(value = "/like", method = RequestMethod.POST)
     @ResponseBody
-    public String like(int entityType, int entityId) {
+    public String like(int entityType, int entityId, int entityUserId) {
         // 用来封装信息的map
         Map<String, Object> map = new HashMap<>();
         // 权限-统一管理，先获取当前用户
         User user = hostHolder.getUser();
         // 点赞事件处理
-        likeService.like(user.getId(), entityType, entityId);
+        likeService.like(user.getId(), entityType, entityId, entityUserId);
         // 点赞数量获取
         long likeCount = likeService.findEntityLikeCount(entityType, entityId);
         // 点赞状态获取

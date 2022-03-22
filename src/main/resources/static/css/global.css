@@ -21,10 +21,10 @@ body {
 }
 
 header .navbar-brand {
-	background: url('http://static.nowcoder.com/images/res/logo/logo-v3.png') no-repeat;
-	background-size: 147px 42px;
-	width: 147px;
-	height: 42px;
+	background: url('https://scpic.chinaz.net/Files/pic/icons128/8355/b2.png') no-repeat;
+	background-size:60px 43px;
+	width: 60px;
+	height: 43px;
 	margin: 5px 15px 5px 0;
 }
 

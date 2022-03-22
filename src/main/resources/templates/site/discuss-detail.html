@@ -3,11 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="icon" href="https://static.nowcoder.com/images/logo_87_87.png"/>
+	<link rel="icon" href="https://scpic.chinaz.net/Files/pic/icons128/8355/b6.png"/>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
 	<link rel="stylesheet" th:href="@{/css/global.css}" />
 	<link rel="stylesheet" th:href="@{/css/discuss-detail.css}" />
-	<title>牛客网-帖子详情</title>
+	<title>交流网-帖子详情</title>
 </head>
 <body>
 	<div class="nk-container">
@@ -75,7 +75,7 @@
 				</h6>
 				<!-- 作者-点赞-回帖信息 -->
 				<div class="media pb-3 border-bottom">
-					<a href="profile.html">
+					<a th:href="@{|/user/profile/${user.id}|}">
 						<img th:src="${user.headerUrl}" class="align-self-start mr-4 rounded-circle user-header" alt="用户头像" >
 					</a>
 					<div class="media-body">
@@ -84,7 +84,7 @@
 							发布于 <b th:text="${#dates.format(post.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
 							<ul class="d-inline float-right">
 								<li class="d-inline ml-2">
-									<a href="javascript:;" class="text-primary" th:onclick="|like(this,1,${post.id});|" >
+									<a href="javascript:;" class="text-primary" th:onclick="|like(this,1,${post.id},${user.id});|" >
 									<b th:text="${likeStatus==1?'已赞':'赞'}">赞</b> <i th:text="${likeCount}">11</i>
 									</a>
 								<li class="d-inline ml-2">|</li>
@@ -112,7 +112,7 @@
 				<ul class="list-unstyled mt-4">
 					<!-- 分页遍历显示回帖 -->
 					<li class="media pb-3 pt-3 mb-3 border-bottom" th:each="cvo:${comments}">
-						<a href="profile.html">
+						<a th:href="@{|/user/profile/${cvo.user.id}|}">
 							<img th:src="${cvo.user.headerUrl}" class="align-self-start mr-4 rounded-circle user-header" alt="用户头像" >
 						</a>
 						<div class="media-body">
@@ -130,7 +130,7 @@
 									<b th:text="${#dates.format(cvo.comment.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
 								<ul class="d-inline float-right">
 									<li class="d-inline ml-2">
-										<a href="javascript:;" class="text-primary" th:onclick="|like(this,2,${cvo.comment.id});|">
+										<a href="javascript:;" class="text-primary" th:onclick="|like(this,2,${cvo.comment.id},${cvo.user.id});|">
 											<b th:text="${cvo.likeStatus==1?'已赞':'赞'}">赞</b>(<i th:text="${cvo.likeCount}">1</i>)
 										</a></li>
 									<li class="d-inline ml-2">|</li>
@@ -140,41 +140,57 @@
 							<!-- 回复列表 -->
 							<ul class="list-unstyled mt-4 bg-gray p-3 font-size-12 text-muted">
 								<!-- 循环遍历每条评论的所有回复 -->
-								<li class="pb-3 pt-3 mb-3 border-bottom" th:each="rvo:${cvo.replys}">
-									<div>
-										<span th:if="${rvo.targetUser==null}">
-											<b class="text-info" th:text="${rvo.user.username}">寒江雪</b>:&nbsp;&nbsp;
-										</span>
-										<span th:if="${rvo.targetUser!=null}">
-											<i class="text-info" th:text="${rvo.user.username}">Sissi</i> 回复
-											<b class="text-info" th:text="${rvo.targetUser.username}">寒江雪</b>:&nbsp;&nbsp;
-										</span>
-										<span th:utext="${rvo.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
-									</div>
-									<div class="mt-3">
-										<span th:text="${#dates.format(rvo.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
-										<ul class="d-inline float-right">
-											<li class="d-inline ml-2">
-												<a href="javascript:;" class="text-primary" th:onclick="|like(this,2,${rvo.reply.id});|">
-													<b th:text="${rvo.likeStatus==1?'已赞':'赞'}">赞</b>(<i th:text="${rvo.likeCount}">1</i>)
-												</a></li>
-											<li class="d-inline ml-2">|</li>
-											<li class="d-inline ml-2"><a th:href="|#huifu-${rvoStat.count}|" data-toggle="collapse" class="text-primary">回复</a></li>
-										</ul>
-										<div th:id="|huifu-${rvoStat.count}|" class="mt-4 collapse">
-<!--											对回复的回复-->
-											<form method="post" th:action="@{|/comment/add/${post.id}|}">
-												<div>
-<!--													注意，要回复的是当前回复的作者，当前的回复可以从rvo中获取-->
-													<input type="text" class="input-size" name="content" th:placeholder="|回复${rvo.user.username}|"/>
-													<input type="hidden" name="entityType" value="2">
-													<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
-													<input type="hidden" name="targetId" th:value="${rvo.user.id}">
-												</div>
-												<div class="text-right mt-2">
-													<button type="submit" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
-												</div>
-											</form>
+								<li class="media pb-3 pt-3 mb-3 border-bottom" th:each="rvo:${cvo.replys}">
+									<a th:href="@{|/user/profile/${rvo.user.id}|}">
+										<img th:src="${rvo.user.headerUrl}" class="align-self-start mr-4 rounded-circle user-header" style="width:30px;height:30px;" alt="用户头像" >
+									</a>
+									<div class="media-body">
+										<div th:if="${rvo.targetUser==null}">
+											<div class="mt-0">
+												<span th:text="${rvo.user.username}">寒江雪</span>
+
+											</div>
+											<div class="mt-2" th:utext="${rvo.reply.content}">
+												这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~
+											</div>
+										</div>
+										<div th:if="${rvo.targetUser!=null}">
+											<div class="mt-0">
+												<span th:text="${rvo.user.username}">Sissi</span>
+											</div>
+											<div class="mt-2">
+												<a th:href="@{|/user/profile/${rvo.targetUser.id}|}">回复
+													<b class="text-info" th:text="|@${rvo.targetUser.username}|">寒江雪</b>
+												</a>:
+												<span th:utext="${rvo.reply.content}">回复的内容</span>
+											</div>
+										</div>
+
+										<div class="mt-3">
+											<span th:text="${#dates.format(rvo.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
+											<ul class="d-inline float-right">
+												<li class="d-inline ml-2">
+													<a href="javascript:;" class="text-primary" th:onclick="|like(this,2,${rvo.reply.id},${rvo.user.id});|">
+														<b th:text="${rvo.likeStatus==1?'已赞':'赞'}">赞</b>(<i th:text="${rvo.likeCount}">1</i>)
+													</a></li>
+												<li class="d-inline ml-2">|</li>
+												<li class="d-inline ml-2"><a th:href="|#huifu-${rvoStat.count}|" data-toggle="collapse" class="text-primary">回复</a></li>
+											</ul>
+											<div th:id="|huifu-${rvoStat.count}|" class="mt-4 collapse">
+	<!--											对回复的回复-->
+												<form method="post" th:action="@{|/comment/add/${post.id}|}">
+													<div>
+	<!--													注意，要回复的是当前回复的作者，当前的回复可以从rvo中获取-->
+														<input type="text" class="input-size" name="content" th:placeholder="|回复${rvo.user.username}|"/>
+														<input type="hidden" name="entityType" value="2">
+														<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
+														<input type="hidden" name="targetId" th:value="${rvo.user.id}">
+													</div>
+													<div class="text-right mt-2">
+														<button type="submit" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
+													</div>
+												</form>
+											</div>
 										</div>
 									</div>								
 								</li>
@@ -227,7 +243,7 @@
 		</div>
 
 		<!-- 尾部 -->
-		<footer class="bg-dark">
+		<footer class="bg-dark" th:replace="index::footer">
 			<div class="container">
 				<div class="row">
 					<!-- 二维码 -->
