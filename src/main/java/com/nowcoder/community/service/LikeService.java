@@ -1,7 +1,7 @@
 package com.nowcoder.community.service;
 
 import com.nowcoder.community.util.CommunityConstant;
-import com.nowcoder.community.util.RedisLikeUtil;
+import com.nowcoder.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
@@ -24,8 +24,8 @@ public class LikeService implements CommunityConstant {
         redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                String entityLikeKey = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
-                String userLikeKey = RedisLikeUtil.getUserLikeKey(entityUserId);
+                String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
+                String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
                 // 在事务启动前查询
                 Boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);
                 // 启动事务
@@ -51,7 +51,7 @@ public class LikeService implements CommunityConstant {
      * @return         用数字来表示点赞的状态，方便扩展
      */
     public int findEntityLikeStatus(int userId, int entityType, int entityId) {
-        String key = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
+        String key = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
         return redisTemplate.opsForSet().isMember(key, userId) ? LIKE_STATUS_YES : LIKE_STATUS_NO;
     }
 
@@ -62,7 +62,7 @@ public class LikeService implements CommunityConstant {
      * @return  注意返回类型是long类型
      */
     public long findEntityLikeCount(int entityType, int entityId) {
-        return redisTemplate.opsForSet().size(RedisLikeUtil.getEntityLikeKey(entityType, entityId));
+        return redisTemplate.opsForSet().size(RedisKeyUtil.getEntityLikeKey(entityType, entityId));
     }
 
     /**
@@ -72,7 +72,7 @@ public class LikeService implements CommunityConstant {
      */
     public int findUserLikeCount(int userId) {
         // 注意类型的转换-value为String类型，要转为int类型
-        Integer count = (Integer)redisTemplate.opsForValue().get(RedisLikeUtil.getUserLikeKey(userId));
+        Integer count = (Integer)redisTemplate.opsForValue().get(RedisKeyUtil.getUserLikeKey(userId));
         return count == null ? 0 : count.intValue();
     }
 }

@@ -26,20 +26,16 @@ public class RedisTest {
     @Test
     public void contextLoads() {
 //       new jedis 对象即可
-        Jedis jedis = new Jedis("192.168.xxx.xxx", 6379);
+        Jedis jedis = new Jedis("192.168.181.131", 6379);
         System.out.printf(jedis.ping());
     }
 
     // 测试redis添加字符串
     @Test
     public void testString() {
-        String redisKey = "test:count";
-
-        redisTemplate.opsForValue().set(redisKey, 1);
+        String redisKey = "like:user:111";
 
         System.out.println(redisTemplate.opsForValue().get(redisKey));
-        System.out.println(redisTemplate.opsForValue().increment(redisKey));
-        System.out.println(redisTemplate.opsForValue().decrement(redisKey));
     }
 
     // redis对哈希表的处理

@@ -33,7 +33,12 @@ public interface CommunityConstant {
     int ENTITY_TYPE_COMMENT = 2;
 
     /**
-     * 点赞状态：位赞
+     * entityType类型：用户
+     */
+    int ENTITY_TYPE_USER = 3;
+
+    /**
+     * 点赞状态：未赞
      */
     int LIKE_STATUS_NO = 0;
 

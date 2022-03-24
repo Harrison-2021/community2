@@ -2,8 +2,10 @@ package com.nowcoder.community.controller;
 
 import com.nowcoder.community.controller.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.service.FollowService;
 import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import com.sun.org.apache.xpath.internal.operations.Mod;
@@ -26,7 +28,7 @@ import java.io.*;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -37,6 +39,9 @@ public class UserController {
 
     @Autowired
     LikeService likeService;
+
+    @Autowired
+    FollowService followService;
 
     @Value("${community.path.domain}")
     String domain;
@@ -135,11 +140,29 @@ public class UserController {
         if(user == null) {
             throw new IllegalArgumentException("该用户不存在!");
         }
-        // 将用户信息封装
+        // 将指定用户信息封装
         model.addAttribute("user", user);
-        // 获取用户的点赞数量
+
+        // 获取指定用户的点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+
+        // 获取指定用户的关注对象数量
+        long followTargetCnt = followService.findFollowTargetCnt(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followTargetCnt", followTargetCnt);
+
+        // 获取指定用户的粉丝数量
+        long followFans = followService.findFollowFans(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followFans", followFans);
+
+        // 获取当前用户对指定用户的关注状态
+        boolean hasFollowed = false;
+        if(hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(
+                    hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
+
         return "/site/profile";
     }
 }
