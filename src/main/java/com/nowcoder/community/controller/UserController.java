@@ -8,7 +8,6 @@ import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +18,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
@@ -152,7 +149,7 @@ public class UserController implements CommunityConstant {
         model.addAttribute("followTargetCnt", followTargetCnt);
 
         // 获取指定用户的粉丝数量
-        long followFans = followService.findFollowFans(ENTITY_TYPE_USER, userId);
+        long followFans = followService.findFollowFansCnt(ENTITY_TYPE_USER, userId);
         model.addAttribute("followFans", followFans);
 
         // 获取当前用户对指定用户的关注状态
