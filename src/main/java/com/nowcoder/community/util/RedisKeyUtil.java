@@ -8,6 +8,9 @@ public class RedisKeyUtil {
     private static final String PREFIX_USER_LIKE = "like:user";     // 对用户的点赞
     private static final String PREFIX_FOLLOW_TARGET = "follow:target";   // 关注的对象
     private static final String PREFIX_FOLLOW_FANS = "follow:fans";   // 粉丝
+    private static final String PREFIX_KAPTCHA = "kaptcha"; // 验证码
+    private static final String PREFIX_TICKET = "ticket";   // 登录凭证
+    private static final String PREFIX_USER = "user";       // 登录用户
 
     /**
      * 对某个实体的赞的key
@@ -50,5 +53,32 @@ public class RedisKeyUtil {
      */
     public static String getFollowFans(int entityType, int entityId) {
         return PREFIX_FOLLOW_FANS + SPLIT + entityType + SPLIT + entityId;
+    }
+
+    /**
+     * 给某个用户发送的验证码
+     * @param owner     每个用户浏览器中的cookie存储的私有字符串-因没有登录，没有登录凭证
+     * @return
+     */
+    public static String getKaptcha(String owner) {
+        return PREFIX_KAPTCHA + SPLIT + owner;
+    }
+
+    /**
+     * 给登录用户颁发登录凭证的key
+     * @param ticket
+     * @return
+     */
+    public static String getTicket(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
+    }
+
+    /**
+     * 缓存指定用户的key
+     * @param userId
+     * @return
+     */
+    public static String getUser(int userId) {
+        return PREFIX_USER + SPLIT + userId;
     }
 }

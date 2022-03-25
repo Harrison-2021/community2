@@ -7,9 +7,11 @@ import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.MailClient;
+import com.nowcoder.community.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -18,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService implements CommunityConstant {
@@ -30,21 +33,35 @@ public class UserService implements CommunityConstant {
     @Autowired
     private TemplateEngine templateEngine;
 
+    @Autowired
+    //private LoginTicketMapper loginTicketMapper;
+    private RedisTemplate redisTemplate;
+
     @Value("${community.path.domain}")
     private String domain;
 
     @Value("${server.servlet.context-path}")
     private String contextPth;
 
-    @Autowired
-    private LoginTicketMapper loginTicketMapper;
-
-    // 根据id查询用户
-    public User findUserById(int id) {
-        return userMapper.selectById(id);
+    /**
+     * 根据id查询用户-优先从缓存中查，缓存没有，就初始化缓存，再拿到用户信息
+     * @param userId
+     * @return
+     */
+    public User findUserById(int userId) {
+    //return userMapper.selectById(userId);
+        User user = getUserCache(userId);
+        if(user == null) {
+            user = initUserCache(userId);
+        }
+        return user;
     }
 
-    // 根据用户名查询用户
+    /**
+     * 根据用户名查询用户
+     * @param name
+     * @return
+     */
     public User findUserByName(String name) {
         return userMapper.selectByName(name);
     }
@@ -139,7 +156,10 @@ public class UserService implements CommunityConstant {
         if (user.getStatus() == 1) {   // 重复激活
             return ACTIVATION_REPEAT;
         } else if (user.getActivationCode().equals(code)) { // 激活码匹配成功
-            userMapper.updateStatus(userId, 1); // 更新用户状态，激活成功
+            // 更新用户状态，激活成功-同时删除缓存-要先更新，再删除，防止更新不成功
+            // 注意缓存不一致的问题
+            userMapper.updateStatus(userId, 1);
+            clearUserCache(userId);
             return ACTIVATION_SUCCESS;
         } else {    // 激活码不匹配，不能激活
             return ACTIVATION_FAILURE;
@@ -190,26 +210,79 @@ public class UserService implements CommunityConstant {
         loginTicket.setStatus(0); // 0有效，1无效，登出时设置为1
         // 注意日期转换的格式单位：毫秒
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000L));
-        loginTicketMapper.insertLoginTicket(loginTicket);
-        // 将登录凭证ticket字符串传给视图层
+        //loginTicketMapper.insertLoginTicket(loginTicket);
+        // 将登录凭证储存到redis中，
+        // 注意，redis的数据不设定过期时间，这个数据长久保存，今后扩展功能有用
+        // value储存对象-JSON字符串
+        String ticketKey = RedisKeyUtil.getTicket(loginTicket.getTicket());
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
+
+        // 将登录凭证ticket字符串传给Controller
         map.put("ticket", loginTicket.getTicket());
         return map;
     }
 
     /** 登出业务处理*/
     public void logout(String ticket) {
-        loginTicketMapper.updateLoginTicket(ticket, 1);
+    //loginTicketMapper.updateLoginTicket(ticket, 1);
+        // 由于value储存的是一个对象，要改变对象里面的属性，需要先取出来，改变后，再存回去
+        String ticketKey = RedisKeyUtil.getTicket(ticket);
+        LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
+        loginTicket.setStatus(1);
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
     }
 
-    // 根据用户凭证ticket查询t票类
+    /**
+     * 根据用户凭证ticket查询t票类
+     * @param ticket    用户cookie中储存的ticket字符串
+     * @return
+     */
     public LoginTicket selectByTicket(String ticket) {
-        return loginTicketMapper.selectByTicket(ticket);
+        //return loginTicketMapper.selectByTicket(ticket);
+        return (LoginTicket) redisTemplate.opsForValue().get(RedisKeyUtil.getTicket(ticket));
     }
 
-    // 更改用户头像
+    /**
+     *  更改用户头像
+     * @param userId
+     * @param headerUrl
+     * @return
+     */
     public int updateHeader(int userId, String headerUrl) {
-        return userMapper.updateHeader(userId, headerUrl);
+        int row = userMapper.updateHeader(userId, headerUrl);
+        clearUserCache(userId);
+        return row;
     }
 
+    /**
+     * 1.查询用户时，先从缓存中取值-若取不到，进行第二步初始化缓存数据
+     * @param userId    要查询用户的id
+     * @return          查询到的用户
+     */
+    public User getUserCache(int userId) {
+        String userKey = RedisKeyUtil.getUser(userId);
+        return (User) redisTemplate.opsForValue().get(userKey);
+    }
 
+    /**
+     * 2.初始化缓存-将mysql中查询到的用户缓存到redis中，并设置过期时间
+     * @param userId
+     * @return
+     */
+    public User initUserCache(int userId) {
+        // 从mysql数据中查询到用户，进行缓存
+        User user = userMapper.selectById(userId);
+        String userKey = RedisKeyUtil.getUser(userId);
+        redisTemplate.opsForValue().set(userKey, user, 3600, TimeUnit.SECONDS);
+        return user;
+    }
+
+    /**
+     * 3.清理缓存-当user数据变更时，直接清除缓存，而不是修改，这样防止并发情况
+     * @param userId
+     */
+    public void clearUserCache(int userId) {
+        String userKey = RedisKeyUtil.getUser(userId);
+        redisTemplate.delete(userKey);
+    }
 }
