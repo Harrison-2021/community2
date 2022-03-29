@@ -26,7 +26,7 @@ public class RedisTest {
     @Test
     public void contextLoads() {
 //       new jedis 对象即可
-        Jedis jedis = new Jedis("192.168.181.131", 6379);
+        Jedis jedis = new Jedis("192.168.181.136", 6379);
         System.out.printf(jedis.ping());
     }
 

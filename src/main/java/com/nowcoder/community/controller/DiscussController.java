@@ -75,7 +75,7 @@ public class DiscussController implements CommunityConstant {
     public String getPostPage(Model model, @PathVariable("postId") int postId, Page page ) {
 // 1.帖子的数据信息
         // 查询到指定帖子-由于点击的是帖子主题，一定存在帖子
-        DiscussPost discussPost = discussPostService.selectPost(postId);
+        DiscussPost discussPost = discussPostService.selectPostById(postId);
         model.addAttribute("post", discussPost);
         // 查询到帖子作者信息-帖子必须由指定用户发布，故，一定能查询到用户
         User user = userService.findUserById(discussPost.getUserId());

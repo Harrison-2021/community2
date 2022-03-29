@@ -35,4 +35,10 @@
     <insert id="insertComment" parameterType="comment" keyProperty="id">
         <include refid="insertFields"></include>
     </insert>
+
+<!--    根据id查询一条评论-->
+    <select id="selectCommentById" resultType="comment">
+        <include refid="selectFields"></include>
+        where id = #{id}
+    </select>
 </mapper>

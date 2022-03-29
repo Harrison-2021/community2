@@ -50,7 +50,8 @@ public class DiscussPostService {
     }
 
     /** 查询一条帖子信息 */
-    public DiscussPost selectPost(int id) {
+    public DiscussPost selectPostById(int id) {
         return discussPostMapper.selectPost(id);
     }
+
 }

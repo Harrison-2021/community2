@@ -36,6 +36,9 @@ public class ServiceAspect {
         // 获取用户信息
         // 获取请求上下文
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(requestAttributes == null) { // 不是通过controller调用service
+            return;
+        }
         // 获取请求
         HttpServletRequest request = requestAttributes.getRequest();
         // 用户ip

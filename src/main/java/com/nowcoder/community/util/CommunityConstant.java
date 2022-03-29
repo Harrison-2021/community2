@@ -46,4 +46,24 @@ public interface CommunityConstant {
      * 点赞状态：已赞
      */
     int LIKE_STATUS_YES = 1;
+
+    /**
+     * kafka主题-事件：帖子-评论
+     */
+    String TOPIC_COMMENT = "comment";
+
+    /**
+     * kafka主题-事件：关注
+     */
+    String TOPIC_FOLLOW = "follow";
+
+    /**
+     * kafka主题-事件：点赞
+     */
+    String TOPIC_LIKE = "like";
+
+    /**
+     * 系统用户id
+     */
+    int SYSTEM_USER_ID = 1;
 }
