@@ -16,7 +16,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -142,6 +144,16 @@ public class MapperTest {
         System.out.println("111未读私信总数 " + messageMapper.selectUnreadCount(131, null));
         System.out.println("111_131未读私信总数 " + messageMapper.selectUnreadCount(131, "111_131"));
 
+    }
+
+    // 查询系统通知
+    @Test
+    public void testNotice() {
+//        System.out.println(messageMapper.selectNoticeCount(112, "like"));
+//        System.out.println(messageMapper.selectNoticeUnreadCount(112, "like"));
+//        Map<String, Object> map = null;
+//        System.out.println(map);
+//        System.out.println(map.get("hekk"));
     }
 }
 

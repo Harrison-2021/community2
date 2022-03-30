@@ -81,4 +81,49 @@
             #{id}
         </foreach>
     </update>
+
+<!--    查询系统给指定用户指定主题下最新的通知-->
+    <select id="selectLatestNotice" resultType="message">
+        <include refid="selectFields"></include>
+        where id in (
+            select max(id) from message
+            where status != 2
+            and from_id = 1
+            and to_id = #{userId}
+            and conversation_id = #{topic}
+        )
+    </select>
+
+<!--    查询系统给指定用户指定主题下包含系统通知的数量-->
+    <select id="selectNoticeCount" resultType="int">
+        select count(id) from message
+        where status != 2
+          and from_id = 1
+          and to_id = #{userId}
+          and conversation_id = #{topic}
+    </select>
+
+<!--    查询未读系统通知的数量-动态sql-->
+    <select id="selectNoticeUnreadCount" resultType="int">
+        select count(id) from message
+        where status != 2
+          and status = 0
+          and from_id = 1
+          and to_id = #{userId}
+          <if test="topic != null">
+              and conversation_id = #{topic}
+          </if>
+    </select>
+
+<!--    查询特点主题下的通知列表详情-->
+    <select id="selectNoticeList" resultType="message">
+        <include refid="selectFields"></include>
+        where status != 2
+        and from_id = 1
+        and to_id = #{userId}
+        and conversation_id = #{topic}
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
 </mapper>

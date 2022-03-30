@@ -1,10 +1,12 @@
 package com.nowcoder.community.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.nowcoder.community.entity.Message;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 
 @Controller
-public class MessageController {
+public class MessageController implements CommunityConstant {
+    public Message message = null;                 //查询到的最新一条通知信息
+    public Map<String, Object> messageVo = null;   // 用来封装聚合数据的map
+
     @Autowired
     private MessageService messageService;
 
@@ -59,6 +65,8 @@ public class MessageController {
             // 查询所有未读消息数量
             int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
             model.addAttribute("letterUnreadCount", letterUnreadCount);
+            int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(), null);
+            model.addAttribute("noticeUnreadCount", noticeUnreadCount);
         }
 
         return "/site/letter";
@@ -84,10 +92,8 @@ public class MessageController {
                 map.put("letter", letter);
                 map.put("fromUser", userService.findUserById(letter.getFromId()));
                 // 筛选出未读私信，获取id，之后统一处理更新为已读状态
-                // 与查询逻辑一致，是发送对象为当前用户的私信且状态为0
-                if(letter.getToId() == hostHolder.getUser().getId() && letter.getStatus() == 0) {
-                    ids.add(letter.getId());
-                }
+                addUnreadIds(ids, letter);
+
                 letterVo.add(map);
             }
             model.addAttribute("letters", letterVo);
@@ -147,5 +153,127 @@ public class MessageController {
         messageService.addMessage(message);
 
         return CommunityUtil.getJSONString(0, "发送私信成功!");
+    }
+
+    /**
+     * 查询系统通知列表的请求
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/notice/list", method = RequestMethod.GET)
+    public String getNoticeList(Model model) {
+        // 1.先获取当前登录用户
+        User user = hostHolder.getUser();
+        int userId = user.getId();
+        // 2.显示评论总体信息
+        addData(userId, TOPIC_COMMENT);
+        model.addAttribute("commentNotice", messageVo);
+        // 3. 显示点赞信息
+        addData(userId, TOPIC_LIKE);
+        model.addAttribute("likeNotice", messageVo);
+        // 4. 显示关注信息
+        addData(userId, TOPIC_FOLLOW);
+        model.addAttribute("followNotice", messageVo);
+        // 5. 查询总的未读消息数量
+        int letterUnreadCount = messageService.findLetterUnreadCount(userId, null);
+        model.addAttribute("letterUnreadCount", letterUnreadCount);
+        int noticeUnreadCount = messageService.findNoticeUnreadCount(userId, null);
+        model.addAttribute("noticeUnreadCount", noticeUnreadCount);
+
+        return "site/notice";
+    }
+
+    /**
+     * 显示通知列表详情
+     * @param topic
+     * @param page
+     * @param model
+     * @return
+     */
+    @RequestMapping(path = "/notice/detail/{topic}", method = RequestMethod.GET)
+    public String getNoticeDetail(@PathVariable("topic") String topic, Page page, Model model) {
+        User user = hostHolder.getUser();
+
+        page.setLimit(5);
+        page.setPath("/notice/detail/" + topic);
+        page.setRows(messageService.findNoticeCount(user.getId(), topic));
+
+        List<Message> noticeList = messageService.findNotices(user.getId(), topic, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> noticeVoList = new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
+        if (noticeList != null) {
+            for (Message notice : noticeList) {
+                // 先筛选出未读信息
+                addUnreadIds(ids,notice);
+
+                Map<String, Object> map = new HashMap<>();
+                // 通知
+                map.put("notice", notice);
+                // 内容
+                String content = HtmlUtils.htmlUnescape(notice.getContent());
+                Map<String, Object> data = JSONObject.parseObject(content, HashMap.class);
+                map.put("user", userService.findUserById((Integer) data.get("userId")));
+                map.put("entityType", data.get("entityType"));
+                map.put("entityId", data.get("entityId"));
+                map.put("postId", data.get("postId"));
+                // 通知作者-也就是系统
+                map.put("fromUser", userService.findUserById(notice.getFromId()));
+
+                noticeVoList.add(map);
+            }
+        }
+        model.addAttribute("notices", noticeVoList);
+
+        // 设置已读
+        if (!ids.isEmpty()) {
+            messageService.updateStatus(ids);
+        }
+
+        return "/site/notice-detail";
+    }
+
+    /**
+     * 统计未读消息的id
+     * 与查询逻辑一致，是发送对象为当前用户的私信且状态为0
+     * @param ids       收集未读消息id的列表
+     * @param message   要判定的每个消息对象
+     */
+    private void addUnreadIds(List<Integer> ids, Message message) {
+        if(message.getToId() == hostHolder.getUser().getId() && message.getStatus() == 0) {
+            ids.add(message.getId());
+        }
+    }
+
+    /**
+     * 封装处理系统通知封装数据的代码
+     * @param userId          当前登录的用户id
+     * @param topic           主题
+     */
+    private void addData(int userId, String topic) {
+        message = messageService.findLatestNotice(userId, topic);
+        messageVo = new HashMap<>();
+        if(message != null) {
+            // 装进最新一条评论信息
+            messageVo.put("message", message);
+            // 将content内的json字符串恢复成对象，方便处理
+            // 先将转义字符反转成正常字符
+            message.setContent(HtmlUtils.htmlUnescape(message.getContent()));
+            Map<String, Object> data = JSONObject.parseObject(message.getContent(), Map.class);
+            // 触发者信息
+            messageVo.put("fromUser", userService.findUserById((Integer) data.get("userId")));
+            // 触发对象信息
+            messageVo.put("entityType", data.get("entityType"));
+            messageVo.put("entityId", data.get("entityId"));
+            Integer postId = (Integer)data.get("postId");
+            if(postId != null) {    // 关注类通知没有这个数据，因为不需要
+                messageVo.put("postId", postId);
+            }
+            // 消息总数
+            int count = messageService.findNoticeCount(userId, topic);
+            messageVo.put("count", count);
+            // 未读消息数量
+            int unread = messageService.findNoticeUnreadCount(userId, topic);
+            messageVo.put("unread", unread);
+        }
     }
 }
