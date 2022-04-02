@@ -1,9 +1,7 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.entity.Comment;
-import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.entity.Page;
-import com.nowcoder.community.entity.User;
+import com.nowcoder.community.entity.*;
+import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.service.CommentService;
 import com.nowcoder.community.service.DiscussPostService;
 import com.nowcoder.community.service.LikeService;
@@ -12,6 +10,7 @@ import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +38,9 @@ public class DiscussController implements CommunityConstant {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    EventProducer eventProducer;
+
     /**
      * 处理ajax异步发布帖子请求
      * @param title     帖子主题
@@ -60,6 +62,14 @@ public class DiscussController implements CommunityConstant {
         discussPost.setUserId(user.getId());
         discussPost.setCreateTime(new Date());
         discussPostService.insertPost(discussPost);
+
+        // 发布帖子后，触发发帖事件-向kafka服务器发布消息
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setFromUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(discussPost.getId());
+        eventProducer.sendEvent(event);
 
         // 返回JSON字符串，先处理成功的，失败的今后统一处理
         return CommunityUtil.getJSONString(0, "发布成功!");

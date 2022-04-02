@@ -32,6 +32,12 @@ public class CommentController implements CommunityConstant {
     @Autowired
     DiscussPostService discussPostService;
 
+    /**
+     * 针对特定帖子发布评论
+     * @param discussPostId     // 目标帖子id
+     * @param comment           // 评论内容
+     * @return
+     */
     @RequestMapping(value = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment) {
         // 除请求中需要写的评论内容外，需提供其他素材
@@ -59,6 +65,16 @@ public class CommentController implements CommunityConstant {
         }
         // 将信息发送到消息队列中
         eventProducer.sendEvent(event);
+
+        if (comment.getEntityType() == ENTITY_TYPE_POST) {
+            // 触发发帖事件
+            event = new Event()
+                    .setTopic(TOPIC_PUBLISH)
+                    .setFromUserId(comment.getUserId())
+                    .setEntityType(ENTITY_TYPE_POST)
+                    .setEntityId(discussPostId);
+            eventProducer.sendEvent(event);
+        }
         return "redirect:/discuss/detail/" + discussPostId;
     }
 

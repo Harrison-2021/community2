@@ -151,9 +151,14 @@ public class MapperTest {
     public void testNotice() {
 //        System.out.println(messageMapper.selectNoticeCount(112, "like"));
 //        System.out.println(messageMapper.selectNoticeUnreadCount(112, "like"));
-//        Map<String, Object> map = null;
+        Map<String, Integer> map = null;
 //        System.out.println(map);
 //        System.out.println(map.get("hekk"));
+        String c = "aaa";
+        toString().toCharArray();
+        map.put(c, map.get(c)+1);
+        map.containsKey(c);
+
     }
 }
 

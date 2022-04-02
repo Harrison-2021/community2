@@ -252,9 +252,8 @@ public class MessageController implements CommunityConstant {
     private void addData(int userId, String topic) {
         message = messageService.findLatestNotice(userId, topic);
         messageVo = new HashMap<>();
+        messageVo.put("message", message); // 先将message放入，作为前端的判断条件
         if(message != null) {
-            // 装进最新一条评论信息
-            messageVo.put("message", message);
             // 将content内的json字符串恢复成对象，方便处理
             // 先将转义字符反转成正常字符
             message.setContent(HtmlUtils.htmlUnescape(message.getContent()));

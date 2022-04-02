@@ -1,8 +1,12 @@
 package com.nowcoder.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.nowcoder.community.dao.DiscussPostMapper;
+import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.entity.Message;
+import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.ElasticSearchService;
 import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -25,6 +29,12 @@ public class EventConsumer implements CommunityConstant {
 
     @Autowired
     MessageService messageService;
+
+    @Autowired
+    ElasticSearchService elasticSearchService;
+
+    @Autowired
+    DiscussPostService discussPostService;
 
     /**
      * 被动订阅消息，并将消息入库
@@ -65,5 +75,28 @@ public class EventConsumer implements CommunityConstant {
 
         // 入库-调用service层业务代码-增加了过滤器
         messageService.addMessage(message);
+    }
+
+    /**
+     * 消费发布帖子的消息-将帖子数据提交到ES服务器
+     * @param record
+     */
+    @KafkaListener(topics = TOPIC_PUBLISH)
+    public void handlePublishMessage(ConsumerRecord record) {
+        // 1.边界条件：先检查有无取到消息
+        if (record == null || record.value() == null) {
+            logger.error("消息的内容为空!");
+            return;
+        }
+        // 2.将拿到的消息恢复成Object类型，方便操作
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if(event == null) {
+            logger.error("消息的格式错了!");
+            return;
+        }
+
+        // 3. 将拿到的消息添加到ES服务器中
+        DiscussPost discussPost = discussPostService.selectPostById(event.getEntityId());
+        elasticSearchService.savePost(discussPost);
     }
 }
