@@ -1,0 +1,323 @@
+[TOC]
+
+
+
+> 参考牛客网高级项目教程
+
+## <font color=green>功能需求</font>
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/940d0aee48ce4dfe88c046ae4964e14c.png)
+
+- 对用户输入的内容进行过滤，**如果输入内容有敏感词，显示时，将敏感是用特殊字符替换**
+- 因此，**需要设计一个敏感词过滤器，实现过滤算法**
+  - 1.定义前缀树结构
+  - 2.根据敏感词库文件，初始化前缀树
+  - 3.设计过滤给定文件中敏感词的算法
+
+## <font color=green>2. 过滤器设计</font>
+
+### <font color="#fd7f01">前缀树回顾</font>
+
+#### <font color="#fd7f01">前缀树算法总结链接</font>
+
+[前缀树算法总结](https://blog.csdn.net/xingzhes_/article/details/122721466)
+
+- 名称：Trie、字典树、查找树
+- 特点：**查找效率高，消耗内存大**
+- 应用：字符串检索、词频统计、字符串排序等  
+
+<img src="https://img-blog.csdnimg.cn/7fb0c02255ff4d2cbffc831c947f2f5c.png" alt="在这里插入图片描述" style="zoom:80%;" />
+
+### <font color="#fd7f01">1. 定义前缀树</font>
+
+#### <font color="#fd7f01">1.1 定义前缀树的节点</font>
+
+##### 两个属性
+
+- 最后一个单词字符的**标志位**：` boolean isWordEnd`
+- **指向下个字符的指针**：`Map<Character, Node> next`
+
+##### 初始化构造函数：
+
+- `isWordEnd` 默认`false`
+- `next`指针，`new一个map容器`
+
+#### <font color="#fd7f01">1.2 定义好前缀树结构</font>
+
+##### 一个属性：
+
+- 每颗树的根节点`root`
+- 并在构造函数中初始化
+
+##### `add(String keyWord)`方法
+
+- 即**提供添加单词构建成前缀树的接口**，供后面过滤敏感词的**初始化使用**
+  - 1.先判空，处理边界条件
+  - 2.处理字符串中的每个字符，从根节点开始构建
+    - **注意，是构建非重复的字符，如果重复，就跳过，继续下层，构建下个节点**
+
+  - 3.最后，**将最后一个节点设置为一个单词的结束标志位**
+
+
+```java
+// 定义前缀树中的节点
+private class Node{
+    public boolean isWordEnd;  // 敏感词最后一个字符结束标志
+    public Map<Character, Node> next; // 指向下个节点的指针
+
+    public Node() {
+        this.isWordEnd = false;
+        this.next = new HashMap<>();
+    }
+}
+
+// 定义前缀树结构
+private class Trie {
+    private Node root;  // 每颗树的根节点
+    public Trie() {
+        root = new Node();
+    }
+
+    // 向前缀树中添加词汇
+    public void add(String keyWord) {
+        if(keyWord == null) { // 边界条件
+            return;
+        }
+        char[] str = keyWord.toCharArray();
+        char c;
+        Node cur = root; // 每次从root根节点开始构建
+        for(int i = 0; i < str.length; i ++) {
+            c = str[i];
+            if(cur.next.get(c) == null ) { // 构建非重复的节点
+                cur.next.put(c, new Node());
+            }
+            // 下层，构建下个节点
+            cur = cur.next.get(c);
+        }
+
+        // 构建完成后，在最后一个节点位置标记为单词结束
+        if(!cur.isWordEnd) {
+            cur.isWordEnd = true;
+        }
+    }
+}
+```
+
+### <font color="#fd7f01">2. 初始化敏感词前缀树</font>
+
+#### <font color="#fd7f01">2.1 定义好全局变量</font>
+
+- 一个是替换敏感词的替换字符串
+
+- **另一个就是前缀树结构Trie，在初始化中将此变量初始化好，后面直接使用即可**
+
+  ```java
+  // 定义好替换符
+  private static final String REPLACEMENT = "***";
+  // 定义好树的全局变量，后面的初始化和过滤算法，都需要用到这个trie树结构
+  private Trie trie = new Trie();
+  ```
+
+#### <font color="#fd7f01">2.2 使用IO流从文件中读取敏感词进行前缀树的初始化</font>
+
+##### `@PostConstruct`
+
+- 管理Bean的初始化，即在创造对象后进行初始化，**默认单例模式，只初始化一次**
+
+##### `getResourceAsStream`
+
+- 从当前类的**类加载器定位到根目录-获取资源作为输入字节流**
+
+##### `InputStreamReader`
+
+- **将字节流改为字符流**
+
+##### `BufferedReader`
+
+- **缓冲流便于读取**
+
+##### `reader.readLine()`
+
+- **缓冲流每次读取一行**
+
+- 将**读取的每行敏感词添加进trie树中，对前缀树进行初始**化
+
+  ```java
+  /**
+   * 根据敏感词文件初始化前缀树
+   * 只初始化一次，即用Spring注解定义初始化位置
+   * 读取敏感词文件内容
+   */
+  @PostConstruct
+  public void init() {
+      try (
+          // 从当前类的类加载器定位到根目录-获取资源作为输入字节流
+          InputStream is = this.getClass().getClassLoader().
+          				getResourceAsStream("Sensitive-words.txt");
+          // 将字节流改为字符流-缓冲流便于读取
+          BufferedReader reader = new BufferedReader
+          					(new InputStreamReader(is));
+      ){
+          // 从缓冲流中读取文件，每次读一行，依次添加进前缀树结构
+          String keyword;
+          while((keyword = reader.readLine()) != null) {
+              // 将敏感词添加进trie树中
+              trie.add(keyword);
+          }
+      } catch (IOException e) {
+          logger.error("加载敏感词文件失败: " + e.getMessage());
+      }
+  }
+  ```
+
+### <font color="#fd7f01">3. 设计过滤敏感词算法</font>
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/940d0aee48ce4dfe88c046ae4964e14c.png)
+
+#### <font color="#fd7f01">3.1 定义和结果集和指针</font>
+
+-  StringBuilder，拼接字符串
+
+**即，用begin和end的指针形成窗口与trie中保存的敏感词比对**
+
+-  `Node cur = trie.root;`   
+  - **指向敏感词前缀树的指针**
+  - **每次处理完一个敏感词词后，重新指向根节点**
+-  窗口内容是敏感字符，`end`右边界扩展敏感字符，`begin`敏感字符起始位置
+   -     ` int begin = 0; `     
+   -  指向要处理文本中敏感词的开始字符(左边界），
+     - **每移动一次，就停下等待，end走完判断完后，再走向下个位置**
+   -     ` int end = 0;`    
+   -  指向敏感词的最后一个字符（右边界），
+     - **每处理完一个词，指针回位到begin要处理的位置**
+
+
+#### <font color="#fd7f01">3.2 注意要跳过敏感词中间的特殊符号</font>
+
+##### `CharUtils.isAsciiAlpha(c)`
+
+- 表示正常字符
+
+`0x2E80~0x9FFF` 是**东亚文字范围，要排除在外**
+
+- 1.**如果特殊符号不是在敏感词中间，而是两侧位置**
+  - 符号可以输出，**正常处理滑动窗口，但不动前缀树**
+- 2.**如果特殊符号在敏感词中间**，表示**特殊符号跳过不处理，且不动前缀树**
+
+####  <font color="#fd7f01">3.3 循环遍历文本字符与敏感词前缀树比对</font>
+
+- 1.**无下级节点，即下个字符不是敏感词中的字符，则不是敏感词**
+  
+  - 将一定不是敏感词开始的字符计入结果中
+  - **begin指针指向下个字符，end归位，重新判断新单词**
+  - **敏感树指针归位**，用以判断下个词开始的位置
+- 2.**有下级节点，且为敏感词结束标志位，说明找到了**
+  
+  - 将找到的敏感词位置用替换字符"***"代替
+  - **将敏感词跳过，进行敏感词的下个第一个字符继续开始判断**
+  - **敏感树指针归位**，用以判断下个词开始的位置
+- 3.**有子节点，但不是最后字符，end继续往下进行查找**
+  
+  - **因为要继续找，cur要下层，判断下个敏感字符**
+- 4.==最后将敏感词是处理完了，但剩下字符还没放入结果集中，最后将一定不是敏感词的字符处理好==
+
+  ```java
+  /**
+   * 过滤敏感词算法
+   * @param text 待过滤的文本
+   * @return 过滤后的文本
+   */
+  public String filter(String text) {
+      // 定义过滤后的结果
+      StringBuilder res = new StringBuilder();
+      // 边界条件，判空
+      if(StringUtils.isBlank(text)) return null;
+      // 定义操作中用到的三个指针
+      Node cur = trie.root;   // 指向敏感词前缀树的指针
+      int begin = 0;      // 指向要处理文本中敏感词的开始字符后，就停下等待
+      int end = 0;  // 指向敏感词的最后一个字符，每处理完一个词，指针回位到begin位置
+      char c;        // 指向处理文本中的每个字符
+      char[] str = text.toCharArray();
+      
+      // 循环遍历文本字符与敏感词前缀树比对
+      while(end < text.length()) { // end指针最先遍历完，敏感词也处理完了
+          c = str[end]; // end指针每次都走一步
+  
+          // 注意要跳过敏感词中间的特殊符号
+          if(isSymbol(c)) { // 是特殊符号，要特殊处理
+              if(cur == trie.root) { // 如果特殊符合不是在敏感词中间，而是两侧位置
+                  // 符号可以输出，直接跳过判断下个字符，不动前缀树
+                  res.append(str[begin]); 
+                  begin ++;
+              }
+              // 如何特殊符号在中间，特殊符号直接跳过不处理，不动前缀树
+              end ++;  
+              continue;  // 当前字符已经处理好了，下面逻辑不执行，继续下一轮的循环
+          }
+  		// 1.不是敏感词
+          if(cur.next.get(c) == null) { // 无下级节点，即不是敏感词
+              res.append(str[begin]);   // 将一定不是敏感词开始的字符计入结果中
+              end = ++begin;      // begin指针指向下个字符，end归位，重新判断新单词
+              cur = trie.root;    // 敏感树指针归位，用以判断下个词开始的位置
+           // 2. 是敏感词
+               //有下级节点，且为敏感词结束标志位，说明找到了
+          } else if(cur.next.get(c).isWordEnd) {
+              res.append(REPLACEMENT);// 将begin和end之间的字符用替换符代替
+              begin = ++end;  // 将敏感词跳过，进行后面第一个字符开始判断
+              cur = trie.root;
+           // 3. 当前不能判断，需要end继续寻找，树继续同步往下
+          } else {
+              end ++;     // 有子节点，但不是最后字符，end继续往下进行查找
+              cur = cur.next.get(c); // 因为要继续找，cur要下层，判断下个敏感字符
+          }
+      }
+  
+      // 最后将敏感词是处理完了，但剩下字符还没放入结果集中，最后将一定不是敏感词的字符处理好
+      res.append(text.substring(begin));
+      return res.toString();
+  }
+  
+  // 判断是否为正常字符，即是否为符号
+  private boolean isSymbol(char c) {
+      // 0x2E80~0x9FFF 是东亚文字范围，要排除在外
+      return !CharUtils.isAsciiAlpha(c) && (c < 0x2e80 || c > 0x9fff);
+  }
+  ```
+
+
+### 测试
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(classes = CommunityApplication.class)
+public class SensitiveTests {
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
+
+    @Test
+    public void testSensitiveFilter() {
+        String text = "这里可以赌博,可以嫖娼,可以吸毒,可以开票,哈哈哈!";
+        text = sensitiveFilter.filter(text);
+        System.out.println(text);
+
+        text = "这里可以☆赌☆博☆,可以☆嫖☆娼☆,可以☆吸☆毒☆,可以☆开☆票☆,哈哈哈!";
+        text = sensitiveFilter.filter(text);
+        System.out.println(text);
+    }
+}
+```
+
+```apl
+这里可以***,可以***,可以***,可以***,哈哈哈!
+这里可以☆***☆,可以☆***☆,可以☆***☆,可以☆***☆,哈哈哈!
+```
+
+### <font color="#fd7f01">易错点</font>
+
+- 1.当遍历的节点既有子节点，也没有到最后一个字符位置时，
+  - **除了指向目标文本的end++，前缀树也要下层到下个节点，比对是动态的**
+
+- 2.循环结束后，并没有将所有字符放入结果集中，只是将将敏感词是处理完了
+  - **最后将一定不是敏感词的字符统一放入结果集中**
+
