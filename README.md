@@ -1,7 +1,7 @@
 ## 1.项目描述
 - 项目旨在为在校师生提供一个学术分享讨论的平台。主要功能： 用户可以通过注册、登录获取不同权限，用户可
 以进行发帖、评论、私信、上传文件、 点赞、关注、搜索、查看热帖排行等操作，管理员能够对后台数据进行统计和维护。
-## 2.项目各功能介绍和技术实现
+## 2.项目各功能介绍和技术实现笔记
 ### [1. 项目环境搭建](https://github.com/Harrison-2021/community2/tree/master/notes/1.%E9%A1%B9%E7%9B%AE%E5%87%86%E5%A4%87%EF%BC%88%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%EF%BC%89)
 ### [2. 开发社区注册登录模块](https://github.com/Harrison-2021/community2/tree/master/notes/2.%E5%BC%80%E5%8F%91%E7%A4%BE%E5%8C%BA%E7%99%BB%E5%BD%95%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9D%97)
 - 使用MD5加密加盐对密码储存， 基于邮件激活注册状态，使用Spring Email发送HTML邮件；使用Kaptcher生成验证码辅助登录验证；使用Session、Cookie会话管理策略记录登录状态和颁发凭证，实现请求间的交互；
