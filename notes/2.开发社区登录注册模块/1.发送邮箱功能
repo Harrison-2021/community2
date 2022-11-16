@@ -1,0 +1,270 @@
+
+## <font color=green>1.第三方邮箱设置</font>
+
+### <font color="#fd7f01">启用客户端SMTP服务</font>
+
+- 注意，**新版需要开启授权码，第三方SpringBoot访问时，需要登录账户和授权码，而不是密码**
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/06c32766b6754dd9aea8c33b8ff466ea.png)
+
+
+
+## <font color=green>2. Spring Email配置与使用</font>
+
+### <font color="#fd7f01">1）导入jar包</font>
+
+```xml
+<!--	mail配置-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+			<version>2.1.5.RELEASE</version>
+		</dependency>
+```
+
+
+
+### <font color="#fd6f01">1）配置文件对邮箱参数配置</font>
+
+```properties
+# MailProperties
+# 域名和端口号
+spring.mail.host=smtp.sina.com
+spring.mail.port=465
+# 邮箱账户和授权码
+spring.mail.username=nowcoderproject@sina.com
+spring.mail.password=1c004d24569a2cbc	
+# smtps安全协议，是否启动安全连接
+spring.mail.protocol=smtps
+spring.mail.properties.mail.smtp.ssl.enable=true
+```
+
+
+
+### <font color="#fd6f01">1）使用 ==JavaMailSender== 发送邮件  </font>
+
+#### <font color="#fd7f01">将发送邮件方法封装</font>
+
+- 因为**发送邮件的事委托给第三方邮件做，相当于客户端**
+- **封装成一个工具类**，有发送邮件的需求，直接使用即可
+
+##### 工具类设计
+
+**要记录logger**
+
+**核心组件注入,`JavaMailSender**
+
+**将发件人信息注入，直接使用**
+
+==**发送邮件方法封装**==
+
+- 传入的参数：是**收件人邮箱**，**邮件标题**，**邮件内容**
+
+- 直接**调用Spring的组件JavaMailSender发送邮件**
+
+  - **组件中主要有创建邮件、发送邮件两个接口**
+
+
+###### ==JavaMailSender==
+
+###### ==MimeMessageHelper==
+
+- **创建邮件接口**：创建邮件`message`后，需要使用`helper`辅助类帮助构建`message`里面的内容
+
+  - `MimeMessage message = javaMailSender.createMimeMessage();`
+
+  - 构建对象信息，==使用MimeMessageHelper构建==工具构建邮件信息
+
+    - `MimeMessageHelper helper = new MimeMessageHelper(message);`
+
+      - 构建发件人信息
+
+      - 构建主题
+
+      - 构建收件人信息
+
+      - 构建内容，兼容HTML格式
+
+        ```java
+        // 使用MimeMessageHelper构建工具构建邮件信息
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(content, true); // true表示打开对html的支持
+        ```
+
+        
+
+- **发送邮件接口**：
+
+  - `javaMailSender.send(helper.getMimeMessage());`
+
+    ```java
+    // 发送构建好的邮件
+    javaMailSender.send(helper.getMimeMessage()); // 从helper里将构建好的message取出
+    ```
+
+    
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/1473c739a3664398b040cac34b98d976.png)
+
+- 代码展示：
+
+```java
+@Component
+public class MailClient {
+    // 记录日志
+    private static Logger logger = LoggerFactory.getLogger(MailClient.class);
+
+    // Spring的email核心组件
+    @Autowired
+    private JavaMailSender javaMailSender;
+
+    // 注入发件人属性值
+    @Value("${spring.mail.username}")
+    private String from;
+
+    // 发送邮件方法封装
+    public void sendMail(String to, String subject, String content) {
+        try {
+            // 使用组件接口创建邮件对象
+            MimeMessage message = javaMailSender.createMimeMessage();
+            // 使用MimeMessageHelper构建工具构建邮件信息
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true); // true表示打开对html的支持
+            // 发送构建好的邮件
+            javaMailSender.send(helper.getMimeMessage()); // 从helper里将构建好的message取出
+        } catch (MessagingException e) {
+            logger.error("发送邮件失败:" + e.getMessage());
+        }
+    }
+}
+```
+
+#### <font color="#fd7f01">发送普通邮件测试</font>
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(classes = CommunityApplication.class)
+public class MailTest {
+    @Autowired
+    private MailClient mailClient;
+
+    @Test
+    public void testTestMail() {
+        mailClient.sendMail("liushenggcs@163.com", "TEST", "welcome");
+    }
+```
+
+
+
+## <font color=green>3. 发送HTML邮件  </font>
+
+### <font color="#fd7f01">使用 Thymeleaf 发送 HTML 邮件  </font>
+
+- 由于在测试类中，没有使用`dispatchServlet`前端控制器引擎去处理动态页面，
+- ==**直接调用Thmeleaf模板引擎处理**==
+
+#### 注入模板引擎
+
+##### ==TemplateEngine==
+
+```java
+@Autowired
+private TemplateEngine templateEngine;
+```
+
+#### 使用模板引擎
+
+##### ==Context==
+
+- 创建封装数据的`context`，类似于`model`
+
+- **将要在模板HTML页面显示的数据装入context里**
+
+  - 这样将数据传给模板`context`里，然后传给前端引擎进行渲染处理
+
+  ```java
+  // 创建封装数据的model
+  Context context = new Context();
+  context.setVariable("username", "sunday");
+  ```
+
+##### ==templateEngine.process==
+
+- 利用模板生成动态网页
+
+  - **模板引擎自动识别context传入的参数**，然后动态加载到网页中，
+
+  - **将网页的动态变量进行替换，并将网页内容加载到content中**
+
+    ```java
+    String content = templateEngine.process("/mail/demo", context);//模板页面，model数据
+    System.out.println(content);// 测试模板页面处理后的数据：欢迎你，sunday！
+    ```
+
+    ```xml
+    <!-- templeate/mail/demo html文件-->
+    <!DOCTYPE html>
+    <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>邮件示例</title>
+    </head>
+    <body>
+        <p>欢迎你，<span style="color: red" th:text="${username}"></span>!</p>
+    </body>
+    </html>
+    ```
+
+    
+
+- **用框架发送邮件，内容是模板引擎获取的内容**
+
+  ```java
+  //用框架发发邮件，内容是模板引擎获取的内容
+  mailClient.sendMail("liushenggcs@163.com", "HTML", content);
+  ```
+
+  
+
+  ```java
+  @Test
+      public void testHtmlMail() {
+          // 创建封装数据的model
+          Context context = new Context();
+          context.setVariable("username", "sunday");
+  
+          // 利用模板生成动态网页
+          // 模板引擎自动识别context传入的参数，然后动态加载到网页中，
+          // 将网页的动态变量进行替换，并将网页内容加载到content中
+          String content = templateEngine.process("/mail/demo", context);
+          System.out.println(content);
+  
+          //用框架发发邮件，内容是模板引擎获取的内容
+          mailClient.sendMail("liushenggcs@163.com", "HTML", content);
+      }
+  ```
+
+#### 动态模板HTML及测试结果显示
+
+```xml
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>邮件示例</title>
+</head>
+<body>
+    <p>欢迎你，<span style="color: red" th:text="${username}"></span>!</p>
+</body>
+</html>
+```
+
+<img src="https://img-blog.csdnimg.cn/734a254264864a97a77db5c7cbf36f20.png" alt="在这里插入图片描述" style="zoom: 80%;" />
+
