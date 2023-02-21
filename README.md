@@ -18,3 +18,59 @@
 - SpringSecurity管理认证权限与防止CSRF攻击；使用Redis的HyperLogLog、BitMap数据结构分别统计后台独立访客、日活跃用户数据。
 ### [8.项目总结与部署](https://github.com/Harrison-2021/community2/tree/master/notes/8.%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93%E4%B8%8E%E9%83%A8%E7%BD%B2)
 - SpringBoot单元测试保证测试独立性；Spring端点监控配置与权限设置；项目部署到Linux服务器技术。
+## 3. 各功能模块demo
+- 1. 网页首页展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/dd655e1fc22f474a8c2714055df333ea.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/bd806484f4c54f1fbd9a963576e2e79f.png)
+
+- 2. 登录注册展示
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2a246c0226d34612b6a3191e250af417.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/691b9b44f9ce4ef08ca7056423e37f0c.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/61e34f400a3145cfa64edfa96f8bd063.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/62115cc845b943a790384ab53eec2d5d.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b391986c59d24fc6b4dfedf1b1d2ee72.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/773aeb0b160d4209a88bc880e421c769.png)
+
+
+- 3. 发帖与评论展示
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/572fb86342334a05a34045358b6acf5d.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d6d36395417a45ccb14a227e442f57eb.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/a17ff05bd30a43e391f7d301df88b897.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/e5b74f5c3e1840e081d33c86454e1290.png)
+
+
+- 4. 点赞关注展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3f1b970c8c1244968505251a89c27d13.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c740d5dd3704484c809f7aa4cf67ab9d.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4dd1e9a8695a4703a68bb8adf2ab7819.png)
+
+
+- 5. 系统通知与私信展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/7a37c64ab53746faa159b2129afc0dda.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d69e2c9135854b1f8663fa4d758ff5ad.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/95044838343544ee884e2408bd686468.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3dddf216e46d4c448c68c18bf088e62b.png)
+
+
+- 6. 搜索功能展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3db0ad5f00e245f5be010a2223a0bb7d.png)
+
+- 7. 后台数据统计
+  - 非管理员没有权限访问
+  ![在这里插入图片描述](https://img-blog.csdnimg.cn/9af911d658994029aabcee0413c322ee.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5aSp55Sf5oiR5omNfn4=,size_20,color_FFFFFF,t_70,g_se,x_16)
+  - 统计独立访客UV
+
+  ![在这里插入图片描述](https://img-blog.csdnimg.cn/fbb9aae626d64a43a753850431b80167.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5aSp55Sf5oiR5omNfn4=,size_20,color_FFFFFF,t_70,g_se,x_16)
+
+  - 统计活跃用户
+
+  ![在这里插入图片描述](https://img-blog.csdnimg.cn/f219aede0a884e3b9faf1ed7db3dbb7e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5aSp55Sf5oiR5omNfn4=,size_20,color_FFFFFF,t_70,g_se,x_16)
+
+- 8. 权限管理与帖子排行
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c8e02a136deb4f7491aeb023290a9c53.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2741a859cae04d8380aba70ceed1412e.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ce5786256c554595b52eb8522ffcc273.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/84988fde5a3247d18f3ec0c3328e7f06.png)
+
