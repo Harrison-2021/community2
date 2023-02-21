@@ -20,8 +20,8 @@
 - SpringBoot单元测试保证测试独立性；Spring端点监控配置与权限设置；项目部署到Linux服务器技术。
 ## 3. 各功能模块demo
 ### 1. 网页首页展示
+![请添加图片描述](https://img-blog.csdnimg.cn/6ef4e2630013482682e71fa238bb5d98.gif)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/dd655e1fc22f474a8c2714055df333ea.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/bd806484f4c54f1fbd9a963576e2e79f.png)
 
 ### 2. 登录注册展示
 
@@ -34,27 +34,31 @@
 
 
 ### 3. 发帖与评论展示
+![请添加图片描述](https://img-blog.csdnimg.cn/df2de8c94f894b29bbd76a916253979e.gif)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ae2e6674b800455cac6f35fbcac7c03f.gif)
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/572fb86342334a05a34045358b6acf5d.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/d6d36395417a45ccb14a227e442f57eb.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/a17ff05bd30a43e391f7d301df88b897.png)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/e5b74f5c3e1840e081d33c86454e1290.png)
 
 
 ### 4. 点赞关注展示
-![在这里插入图片描述](https://img-blog.csdnimg.cn/3f1b970c8c1244968505251a89c27d13.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d567995b253d4891928aee486647cd0e.gif)
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c740d5dd3704484c809f7aa4cf67ab9d.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/4dd1e9a8695a4703a68bb8adf2ab7819.png)
+
 
 
 ### 5. 系统通知与私信展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/064bbe026ce74c709f9573c1bfcb076b.gif)
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/7a37c64ab53746faa159b2129afc0dda.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/d69e2c9135854b1f8663fa4d758ff5ad.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/95044838343544ee884e2408bd686468.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/3dddf216e46d4c448c68c18bf088e62b.png)
+
+
+
 
 
 ### 6. 搜索功能展示
+![在这里插入图片描述](https://img-blog.csdnimg.cn/f23d0ca42cf547c394adf1285ef34137.gif)
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/3db0ad5f00e245f5be010a2223a0bb7d.png)
 
 ### 7. 后台数据统计
@@ -69,8 +73,7 @@
   ![在这里插入图片描述](https://img-blog.csdnimg.cn/f219aede0a884e3b9faf1ed7db3dbb7e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5aSp55Sf5oiR5omNfn4=,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 ### 8. 权限管理与帖子排行
-![在这里插入图片描述](https://img-blog.csdnimg.cn/c8e02a136deb4f7491aeb023290a9c53.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2741a859cae04d8380aba70ceed1412e.png)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/ce5786256c554595b52eb8522ffcc273.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/cae4b47d27334614aa444c3205070627.gif)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/84988fde5a3247d18f3ec0c3328e7f06.png)
+
 
