@@ -21,7 +21,6 @@
 ## 3. 各功能模块demo
 ### 1. 网页首页展示
 ![请添加图片描述](https://img-blog.csdnimg.cn/6ef4e2630013482682e71fa238bb5d98.gif)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/dd655e1fc22f474a8c2714055df333ea.png)
 
 ### 2. 登录注册展示
 
@@ -37,29 +36,14 @@
 ![请添加图片描述](https://img-blog.csdnimg.cn/df2de8c94f894b29bbd76a916253979e.gif)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/ae2e6674b800455cac6f35fbcac7c03f.gif)
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e5b74f5c3e1840e081d33c86454e1290.png)
-
-
 ### 4. 点赞关注展示
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d567995b253d4891928aee486647cd0e.gif)
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/c740d5dd3704484c809f7aa4cf67ab9d.png)
-
-
 
 ### 5. 系统通知与私信展示
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/064bbe026ce74c709f9573c1bfcb076b.gif)
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/7a37c64ab53746faa159b2129afc0dda.png)
-
-
-
-
-
 ### 6. 搜索功能展示
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f23d0ca42cf547c394adf1285ef34137.gif)
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/3db0ad5f00e245f5be010a2223a0bb7d.png)
 
 ### 7. 后台数据统计
   - 非管理员没有权限访问
@@ -74,6 +58,4 @@
 
 ### 8. 权限管理与帖子排行
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cae4b47d27334614aa444c3205070627.gif)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/84988fde5a3247d18f3ec0c3328e7f06.png)
-
 
